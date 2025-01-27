@@ -1,6 +1,3 @@
-# Creating a README.md content in markdown format
-
-readme_content = """
 # Stock Market Data Scraping and Analysis
 
 This repository contains a Python script for scraping and analyzing stock market data from various sources such as Wikipedia and Yahoo Finance. The script is designed to handle multiple stock symbols, process Excel files, and retrieve data for single-symbol queries.
@@ -93,4 +90,3 @@ This project is licensed under the MIT License.
 ## Contact
 
 For any questions or inquiries, reach out via [your email or GitHub profile].
-"""
