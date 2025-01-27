@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTMX with Material 3 Dark Theme</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Defines the root-level CSS variables for colors and spacing used throughout the design */
+        :root {
+            --md-sys-color-primary: #bb86fc;
+            --md-sys-color-on-primary: #000000;
+            --md-sys-color-surface: #121212;
+            --md-sys-color-on-surface: #ffffff;
+            --md-sys-color-outline: #292929;
+            --spacing: 16px;
+        }
+
+        /* Styles for the body element, including layout and background, to position and align the container */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            margin: 0;
+            padding: var(--spacing);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+        }
+
+        /* The main container for the layout, using grid to organize buttons, main content, and output sections */
+        .container {
+            width: 900px;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: 12px;
+            background-color: #1f1f1f;
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            grid-template-rows: 1fr auto;
+            gap: var(--spacing);
+            padding: var(--spacing);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            margin-top: 32px;
+            align-items: center; /* Aligns items in the grid horizontally */
+        }
+
+        /* Styles for the button container, ensuring buttons are stacked vertically with consistent spacing */
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing);
+            justify-self: center; /* Centers the button container horizontally */
+        }
+
+        /* Defines the appearance and behavior of the buttons, including hover and transition effects */
+        .button {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            border: none;
+            border-radius: 24px;
+            padding: 8px 12px; /* Reduced padding to make buttons smaller */
+            text-align: center;
+            font-size: 14px; /* Reduced font size */
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .button:hover {
+            background-color: #7c4dff;
+            transform: translateY(-2px);
+        }
+
+        /* Styles for the main content area, including dimensions and scroll behavior for dynamic content */
+        .main-content {
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: 8px;
+            padding: var(--spacing);
+            height: 200px;
+            overflow-y: auto;
+            background-color: #2a2a2a;
+        }
+
+        /* Styles for the output area, positioned below the main content and spanning the full container width */
+        .output {
+            grid-column: span 2;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: 8px;
+            padding: var(--spacing);
+            height: 100px;
+            overflow-y: auto;
+            background-color: #2a2a2a;
+            overflow: hidden;
+            resize:vertical; /* Allow resizing */
+            min-height: 200px; /* Minimum width */
+        }
+    </style>
+    <script src="https://unpkg.com/htmx.org"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Button Section -->
+        <div class="button-container">
+            <button class="button" hx-get="/select-index" hx-target="#main-content">Scrape Index</button>
+        </div>
+
+        <!-- Main Content Section -->
+        <div id="main-content" class="main-content">
+            Select an option to scrape stock data.
+        </div>
+
+        <!-- Output Section -->
+        <div id="output" class="output">
+            Output will appear here.
+        </div>
+    </div>
+</body>
+</html>
