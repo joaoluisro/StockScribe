@@ -1,0 +1,9 @@
+ttkbootstrap
+pandas
+openpyxl
+numpy
+yfinance
+time
+random
+tkinter
+threading
