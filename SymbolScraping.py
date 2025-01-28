@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import yfinance as yf
 import time
-import random
+import os.path
 
 # Dictionary of indices, their Wikipedia URLs, and table indices (0-based) to fetch the list of stocks
 index_info = {
@@ -15,18 +15,20 @@ index_info = {
 }
 
 def fetch_index_constituents(index_name):
-    """The Fetsch Index constituents function is called by the scrape indices function and simply pulls the infomration from teh Index info dictionary
-    It uses pandas to scrap the stock lists off Wikipedia (Russel doesnt work not all listed) and returns a dataframe of all of the wikitables contents
+    """pulls the information from the Index info dictionary
+    scrapes the stock lists off Wikipedia and returns a dataframe of all of the wikitables contents
     
     FTSE100 Stocks needed to have .L appended to be correctly collected aggreagted by YFinance (DAX doesnt have this problem Wiki already includes .DE)
     Added a check to replace . to - for YFinance (Some wikitables have headers as Ticker or Symbol)
     """
+    global index_info
     index_data = index_info.get(index_name)
     if not index_data:
         print(f"Index '{index_name}' is not supported.")
         return None
     url = index_data["url"]
     table_index = index_data["table_index"]
+
     try:
         tables = pd.read_html(url)
         constituents = tables[table_index]
@@ -41,13 +43,16 @@ def fetch_index_constituents(index_name):
         elif 'Symbol' in constituents.columns:
             constituents['Symbol'] = constituents['Symbol'].apply(lambda x: str(x).replace('.', '-'))
 
-
         return constituents
+
     except Exception as e:
         print(f"Error fetching data for {index_name}: {e}")
         return None
 
-def fetch_stock_data(symbol, market_returns, start_date, end_date):
+def fetch_stock_data(symbol, 
+                    market_returns, 
+                    start_date, 
+                    end_date):
     """Fetch stock data for a given symbol. Used by upload symbol script and Single symbol functions. Takes a symbol (Make sure it works on YFinance), a dataframe of SP500 returns, and 2 time frame variables.
     Extracts various information from YFinance API with Delays added to avoid rate limiting, and returns a dictionary of this information.
     """
@@ -81,8 +86,6 @@ def fetch_stock_data(symbol, market_returns, start_date, end_date):
 
         hist.index = hist.index.tz_localize(None)
 
-        delay = 1
-
         total_volume = hist['Volume'].sum()
         average_yearly_volume = hist['Volume'].mean() * 252
         sector = stock.info.get('sector', 'N/A')
@@ -90,7 +93,6 @@ def fetch_stock_data(symbol, market_returns, start_date, end_date):
         sector_industry = f"{sector} / {industry}"
         dividend_status = 'Yes' if stock.info.get('dividendYield', 0) > 0 else 'No'
         pe_ratio = stock.info.get('trailingPE', np.nan)
-        time.sleep(random.uniform(delay, delay + 1))  # Random delay between 1-2 seconds
         beta = stock.info.get('beta', np.nan)
         pe_yearly = hist['Close'].pct_change().mean() * 252  # Use this to approximate yearly returns
         sma_50 = hist['Close'].rolling(window=50).mean().iloc[-1]
@@ -99,8 +101,6 @@ def fetch_stock_data(symbol, market_returns, start_date, end_date):
         drawdown = (hist['Close'] - rolling_max) / rolling_max
         max_drawdown = drawdown.min()
         risk_free_rate = 0.02
-
-        time.sleep(random.uniform(delay, delay + 1))  # Random delay between 1-2 seconds
 
         # Check if the provided start date is older than the first trade date, then the data is incomplete within the range.
         is_data_incomplete = pd.to_datetime(start_date) > pd.to_datetime(first_trading_date)
@@ -120,7 +120,6 @@ def fetch_stock_data(symbol, market_returns, start_date, end_date):
         historical_range = f"{years_diff} years, {months_diff} months" if years_diff > 0 else f"{months_diff} months"
         data_range = f"{data_years_diff} years, {data_months_diff} months" if years_diff > 0 else f"{data_months_diff} months"
         
-
         stock_returns = hist['Close'].pct_change().dropna()
         combined = pd.DataFrame({
             'Stock': stock_returns.squeeze(),
@@ -152,7 +151,6 @@ def fetch_stock_data(symbol, market_returns, start_date, end_date):
             'Data Range': data_range,
             'First Trading Date': first_trading_date,
             'Historical Range': historical_range
-
         }
     except Exception as e:
         print(f"Error fetching data for {symbol}: {e}")
@@ -160,9 +158,7 @@ def fetch_stock_data(symbol, market_returns, start_date, end_date):
     
 
 def scrape_indices(index_choice=None):
-    """
-    
-    """
+    global index_info
     if index_choice is None:
         print("\nAvailable indices:")
         for i, name in enumerate(index_info.keys(), 1):
@@ -187,8 +183,12 @@ def scrape_indices(index_choice=None):
             constituents.to_csv(filename, index=False)
             print(f"Data saved to {filename}")
 
-def upload_symbol_script(file_path="D:/Shares/Leopold/Test Workspace/Symbols_preUpdate.xlsx", sheetname="SP500", start_date="2001-01-01", end_date="2024-12-31", output_file_path="D:/Shares/Leopold/Test Workspace/SP500_New.xlsx"):
-    """Fetch stock data for symbols from a provided Excel sheet."""
+def upload_symbol_script(file_path=None,
+                        sheetname="SP500", 
+                        start_date="2001-01-01", 
+                        end_date="2024-12-31", 
+                        output_file_path=None):
+
     if file_path is None:
         file_path = input("Enter the Excel file path: ").strip()
     if sheetname is None:
@@ -224,7 +224,6 @@ def upload_symbol_script(file_path="D:/Shares/Leopold/Test Workspace/Symbols_pre
     print(f"Updated file saved to {output_file_path}")
 
 def single_symbol(stock_symbol=None, start_date=None, end_date=None):
-    """Fetch data for a single stock symbol."""
     og_symbol = stock_symbol
 
     if stock_symbol is None:
@@ -254,10 +253,7 @@ def single_symbol(stock_symbol=None, start_date=None, end_date=None):
         output = "Error"
         return output
 
-    
-
 def main():
-    """Main function to choose the operation."""
     while True:
         print("\nChoose an operation:")
         print("1. Updated/Scrape index list")
