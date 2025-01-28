@@ -223,7 +223,10 @@ def upload_symbol_script(file_path=None,
 
     print(f"Updated file saved to {output_file_path}")
 
-def single_symbol(stock_symbol=None, start_date=None, end_date=None):
+def single_symbol(stock_symbol=None, 
+                start_date=None, 
+                end_date=None):
+                
     og_symbol = stock_symbol
 
     if stock_symbol is None:
